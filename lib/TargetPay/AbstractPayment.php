@@ -7,7 +7,7 @@ namespace TargetPay;
  * @author    Ward van der Put <Ward.van.der.Put@gmail.com>
  * @copyright Copyright © 2014 E.W. van der Put
  * @license   http://www.gnu.org/licenses/gpl.html GPLv3
- * @version   0.1.0
+ * @version   0.1.1
  */
 abstract class AbstractPayment
 {
@@ -81,6 +81,22 @@ abstract class AbstractPayment
             return $this->BaseRequestParameters['currency'];
         } else {
             return 'EUR';
+        }
+    }
+
+    /**
+     * Get the description.
+     *
+     * @param void
+     *
+     * @return string|null Transaction description.
+     */
+    public function getDescription()
+    {
+        if (isset($this->BaseRequestParameters['description'])) {
+            return $this->BaseRequestParameters['description'];
+        } else {
+            return null;
         }
     }
 
@@ -165,6 +181,52 @@ abstract class AbstractPayment
     }
 
     /**
+     * Set the transaction description.
+     *
+     * @api
+     *
+     * @param string $description Short human-readable description of the
+     *     payment transaction.  This description generally SHOULD NOT exceed
+     *     a 32 characters limit, but a longer string will be truncated
+     *     silently.
+     *
+     * @throws \InvalidArgumentException Throws an SPL invalid argument
+     *     exception if the description is not a string or an empty string.
+     *
+     * @throws \DomainException Throws TargetPay error TP0006 as an SPL domain
+     *     exception if the description is empty.
+     */
+    public function setDescription($description)
+    {
+        if (is_int($description)) {
+            $description = (string) $description;
+        } elseif (!is_string($description)) {
+            throw new \InvalidArgumentException(
+                'setDescription() expects parameter 1 to be a string, '
+                . gettype($description) . ' given'
+            );
+        } else {
+            $description = str_replace('€ ', 'EUR ', $description);
+            $description = str_replace(' €', ' euro', $description);
+            $description = str_replace('€', ' EUR ', $description);
+			$description = preg_replace('!\s+!', ' ', $description);
+            $description = trim($description, "\x00..\x20");
+            if (strlen($description) > 32) {
+                $description = substr($description, 0, 32);
+            }
+        }
+
+        if (empty($description)) {
+            throw new \DomainException(
+                'TP0006 No description',
+                (int) base_convert('TP0006', 36, 10)
+            );
+        } else {
+            $this->BaseRequestParameters['description'] = $description;
+        }
+    }
+
+    /**
      * Set the sub-account layout code (rtlo).
      *
      * @internal
@@ -174,7 +236,10 @@ abstract class AbstractPayment
     final private function setRtlo($rtlo)
     {
         if (!is_numeric($rtlo)) {
-            throw new \InvalidArgumentException('TP0001 No layout code', (int) base_convert('TP0001', 36, 10));
+            throw new \InvalidArgumentException(
+                'TP0001 No layout code',
+                (int) base_convert('TP0001', 36, 10)
+            );
         } elseif (!is_int($rtlo)) {
             $rtlo = (int) $rtlo;
         }

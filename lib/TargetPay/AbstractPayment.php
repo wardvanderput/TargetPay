@@ -38,6 +38,10 @@ abstract class AbstractPayment
      *
      * All TargetPay payment transactions MUST be started by providing a
      * personal sub-account layout code or "rtlo" in a request URL.
+     * You have to set up a TargetPay account in order to process online
+     * payments through the TargetPay API:
+     *
+     * @link https://www.targetpay.com/quickreg/69391
      *
      * @param integer $rtlo TargetPay sub-account layout code (rtlo).
      */
@@ -47,7 +51,10 @@ abstract class AbstractPayment
     }
 
     /**
+     * Get current transaction amount.
+     *
      * @param void
+     *
      * @return integer|null Amount payable in cents.
      */
     public function getAmount()
@@ -60,8 +67,8 @@ abstract class AbstractPayment
     }
 
     /**
-	 * Get the current currency.
-	 *
+     * Get the current currency.
+     *
      * @param void
      *
      * @return string ISO currency code.  Defaults to 'EUR' for the euro

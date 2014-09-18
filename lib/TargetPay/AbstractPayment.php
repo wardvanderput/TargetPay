@@ -147,15 +147,23 @@ abstract class AbstractPayment
     {
         $amount = filter_var($amount, FILTER_VALIDATE_INT);
         if ($amount == false) {
-            throw new \InvalidArgumentException('setAmount() expects parameter 1 to be an integer for an ammount in cents, '
-                . gettype($amount) . ' given');
+            throw new \InvalidArgumentException(
+                'setAmount() expects parameter 1 to be an integer for an amount in cents, '
+                . gettype($amount) . ' given'
+            );
         } else {
             $amount = (int) $amount;
         }
         if ($amount < static::MINIMUM_AMOUNT) {
-            throw new \DomainException('TP0002 Amount too low', (int) base_convert('TP0002', 36, 10));
+            throw new \DomainException(
+                'TP0002 Amount too low.',
+                (int) base_convert('TP0002', 36, 10)
+            );
         } elseif ($amount > static::MAXIMUM_AMOUNT) {
-            throw new \DomainException('TP0003 Amount too high', (int) base_convert('TP0003', 36, 10));
+            throw new \DomainException(
+                'TP0003 Amount too high.',
+                (int) base_convert('TP0003', 36, 10)
+            );
         } else {
             $this->BaseRequestParameters['amount'] = $amount;
         }
@@ -209,7 +217,7 @@ abstract class AbstractPayment
             $description = str_replace('€ ', 'EUR ', $description);
             $description = str_replace(' €', ' euro', $description);
             $description = str_replace('€', ' EUR ', $description);
-			$description = preg_replace('!\s+!', ' ', $description);
+            $description = preg_replace('!\s+!', ' ', $description);
             $description = trim($description, "\x00..\x20");
             if (strlen($description) > 32) {
                 $description = substr($description, 0, 32);
@@ -218,12 +226,61 @@ abstract class AbstractPayment
 
         if (empty($description)) {
             throw new \DomainException(
-                'TP0006 No description',
+                'TP0006 No description.',
                 (int) base_convert('TP0006', 36, 10)
             );
         } else {
             $this->BaseRequestParameters['description'] = $description;
         }
+    }
+
+    /**
+     * Set the report URL.
+     *
+     * @api
+     *
+     * @param $report_url Private URL or URI for push messaging from TargetPay.
+     *     The report URL is optional, but MUST be kept hidden from any third
+     *     parties.  If the report URL is set to the return URL, it will
+     *     therefore be ignored.
+     *
+     * @throws \InvalidArgumentException Throws an SPL invalid argument
+     *     exception if the report URL is invalid.  Note that the TargetPay API
+     *     DOES NOT validate a report URL.
+     */
+    public function setReportURL($report_url)
+    {
+        if (!filter_var($report_url, FILTER_VALIDATE_URL)) {
+            throw new \InvalidArgumentException('Invalid report URL');
+        }
+        if ($report_url !== $this->BaseRequestParameters['returnurl']) {
+            $this->BaseRequestParameters['reporturl'] = $report_url;
+        }
+    }
+
+    /**
+     * Set the return URL.
+     *
+     * @api
+     *
+     * @param $return_url Public URL or URI to redirect the client to upon
+     *     completion or cancellation of the payment.
+     *
+     * @throws \InvalidArgumentException Throws TargetPay error TP0004 as an
+     *     SPL invalid argument exception if the URL is invalid.  Note that the
+     *     function filter_var() will only find ASCII URLs to be valid;
+     *     internationalized domain names (containing non-ASCII characters)
+     *     will fail.
+     */
+    public function setReturnURL($return_url)
+    {
+        if (!filter_var($return_url, FILTER_VALIDATE_URL)) {
+            throw new \InvalidArgumentException(
+                'TP0004 No or invalid return URL.',
+                (int) base_convert('TP0004', 36, 10)
+            );
+        }
+        $this->BaseRequestParameters['returnurl'] = $return_url;
     }
 
     /**
@@ -236,8 +293,10 @@ abstract class AbstractPayment
     final private function setRtlo($rtlo)
     {
         if (!is_numeric($rtlo)) {
+            // The actual API response does not include a space:
+            // TP0001 No layoutcode.
             throw new \InvalidArgumentException(
-                'TP0001 No layout code',
+                'TP0001 No layout code.',
                 (int) base_convert('TP0001', 36, 10)
             );
         } elseif (!is_int($rtlo)) {

@@ -7,7 +7,7 @@ namespace TargetPay;
  * @author    Ward van der Put <Ward.van.der.Put@gmail.com>
  * @copyright Copyright © 2014 E.W. van der Put
  * @license   http://www.gnu.org/licenses/gpl.html GPLv3
- * @version   0.0.1
+ * @version   0.0.2
  */
 class iDEAL extends AbstractPayment
 {
@@ -142,5 +142,34 @@ class iDEAL extends AbstractPayment
         }
 
         $this->Issuers = $issuers;
+    }
+
+    /**
+     * Set the iDEAL issuer.
+     *
+     * @api
+     *
+     * @param string $issuer_id Identifier of an iDEAL issuer, usually a Dutch
+     *     bank.  The issuer ID is validated, so there is no need for a prior
+     *     call to the isIssuer() method.
+     *
+     * @return $this
+     *
+     * @throws \UnexpectedValueException An SPL unexpected value runtime
+     *     exception is thrown if the issuer ID is invalid.  Note that this
+     *     event SHOULD be logged as this MAY be caused by a client request
+     *     that has been tempered with.
+     */
+    public function setIssuer($issuer_id)
+    {
+        if ($this->isIssuer($issuer_id)) {
+            $this->BaseRequestParameters['bank'] = $issuer_id;
+        } else {
+            throw new \UnexpectedValueException(
+                'TP0005 No bank ID.',
+                (int) base_convert('TP0005', 36, 10)
+            );
+        }
+        return $this;
     }
 }

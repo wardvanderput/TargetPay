@@ -7,7 +7,7 @@ namespace TargetPay;
  * @author    Ward van der Put <Ward.van.der.Put@gmail.com>
  * @copyright Copyright © 2014 E.W. van der Put
  * @license   http://www.gnu.org/licenses/gpl.html GPLv3
- * @version   0.0.2
+ * @version   0.0.3
  */
 class iDEAL extends AbstractPayment
 {
@@ -97,7 +97,7 @@ class iDEAL extends AbstractPayment
         if (!is_array($issuers)) {
             $issuers = $this->getKnownIssuers();
         }
-        return array_key_exists($issuers, $issuer_id);
+        return array_key_exists($issuer_id, $issuers);
     }
 
     /**

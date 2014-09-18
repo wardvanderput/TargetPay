@@ -7,7 +7,7 @@ namespace TargetPay;
  * @author    Ward van der Put <Ward.van.der.Put@gmail.com>
  * @copyright Copyright © 2014 E.W. van der Put
  * @license   http://www.gnu.org/licenses/gpl.html GPLv3
- * @version   0.1.1
+ * @version   0.2.0
  */
 abstract class AbstractPayment
 {
@@ -136,6 +136,8 @@ abstract class AbstractPayment
      *
      * @param integer $amount Transaction amount in cents.
      *
+     * @return $this
+     *
      * @throws \InvalidArgumentException Throws an SPL invalid argument
      *     exception if the amount is not an integer.
      *
@@ -167,6 +169,7 @@ abstract class AbstractPayment
         } else {
             $this->BaseRequestParameters['amount'] = $amount;
         }
+        return $this;
     }
 
     /**
@@ -176,6 +179,8 @@ abstract class AbstractPayment
      *
      * @param string $currency_code ISO 4217 currency code.  Defaults to 'EUR'
      *     for the European euro.
+     *
+     * @return $this
      */
     public function setCurrency($currency_code = 'EUR')
     {
@@ -186,6 +191,7 @@ abstract class AbstractPayment
                 $this->BaseRequestParameters['currency'] = $rtlo;
             }
         }
+        return $this;
     }
 
     /**
@@ -197,6 +203,8 @@ abstract class AbstractPayment
      *     payment transaction.  This description generally SHOULD NOT exceed
      *     a 32 characters limit, but a longer string will be truncated
      *     silently.
+     *
+     * @return $this
      *
      * @throws \InvalidArgumentException Throws an SPL invalid argument
      *     exception if the description is not a string or an empty string.
@@ -232,6 +240,8 @@ abstract class AbstractPayment
         } else {
             $this->BaseRequestParameters['description'] = $description;
         }
+
+        return $this;
     }
 
     /**
@@ -243,6 +253,8 @@ abstract class AbstractPayment
      *     The report URL is optional, but MUST be kept hidden from any third
      *     parties.  If the report URL is set to the return URL, it will
      *     therefore be ignored.
+     *
+     * @return $this
      *
      * @throws \InvalidArgumentException Throws an SPL invalid argument
      *     exception if the report URL is invalid.  Note that the TargetPay API
@@ -256,6 +268,7 @@ abstract class AbstractPayment
         if ($report_url !== $this->BaseRequestParameters['returnurl']) {
             $this->BaseRequestParameters['reporturl'] = $report_url;
         }
+        return $this;
     }
 
     /**
@@ -265,6 +278,8 @@ abstract class AbstractPayment
      *
      * @param $return_url Public URL or URI to redirect the client to upon
      *     completion or cancellation of the payment.
+     *
+     * @return $this
      *
      * @throws \InvalidArgumentException Throws TargetPay error TP0004 as an
      *     SPL invalid argument exception if the URL is invalid.  Note that the
@@ -281,6 +296,7 @@ abstract class AbstractPayment
             );
         }
         $this->BaseRequestParameters['returnurl'] = $return_url;
+        return $this;
     }
 
     /**

@@ -7,7 +7,7 @@ namespace TargetPay;
  * @author    Ward van der Put <Ward.van.der.Put@gmail.com>
  * @copyright Copyright © 2014 E.W. van der Put
  * @license   http://www.gnu.org/licenses/gpl.html GPLv3
- * @version   0.2.0
+ * @version   0.3.0
  */
 abstract class AbstractPayment
 {
@@ -32,6 +32,18 @@ abstract class AbstractPayment
      */
     protected $BaseRequest;
     protected $BaseRequestParameters = array();
+
+    /** @type string RedirectURI URI for client redirection. */
+    protected $RedirectURI;
+
+    /**
+     * @type string|boolean Response String containing the TargetPay API
+     *     response or false if there is no response.
+     */
+    protected $Response = false;
+
+    /** @type string TransactionID TargetPay transaction identifier (trxid) */
+    protected $TransactionID;
 
     /**
      * Payment Constructor
@@ -101,6 +113,26 @@ abstract class AbstractPayment
     }
 
     /**
+     * Get the redirection URI.
+     *
+     * @param void
+     *
+     * @return string Returns the URI to redirect the client.
+     */
+    public function getRedirectURI()
+    {
+        return $this->RedirectURI;
+    }
+
+    /**
+     * Alias of getRedirectURI()
+     */
+    public function getRedirectURL()
+    {
+        return $this->getRedirectURI();
+    }
+
+    /**
      * Get the TargetPay API request.
      *
      * @param void
@@ -118,6 +150,25 @@ abstract class AbstractPayment
     }
 
     /**
+     * Get the response.
+     *
+     * @param void
+     *
+     * @return string Returns the full string containing the TargetPay API
+     *     response.  If there is no response yet, this method will try to get
+     *     a response from the API by starting a transaction.
+     */
+    public function getResponse()
+    {
+        if ($this->Response !== false) {
+            return $this->Response;
+        } else {
+            $this->startTransaction();
+            return $this->Response;
+        }
+    }
+
+    /**
      * Get the rtlo.
      *
      * @param void
@@ -127,6 +178,20 @@ abstract class AbstractPayment
     public function getRtlo()
     {
         return $this->BaseRequestParameters['rtlo'];
+    }
+
+    /**
+     * Get the transaction ID.
+     *
+     * @api
+     *
+     * @param void
+     *
+     * @return string Returns the TargetPay transaction identifier (trxid).
+     */
+    public function getTransactionID()
+    {
+        return $this->TransactionID;
     }
 
     /**
@@ -319,5 +384,51 @@ abstract class AbstractPayment
             $rtlo = (int) $rtlo;
         }
         $this->BaseRequestParameters['rtlo'] = $rtlo;
+    }
+
+    /**
+     * Start the payment transaction.
+     *
+     * @api
+     *
+     * @param void
+     *
+     * @return boolean Returns true if the transaction was started successfully
+     *     or false if an error occurred.  If a successful transaction has
+     *     already been started, it will not be restarted.
+     */
+    public function startTransaction()
+    {
+        if (isset($this->TransactionID)) {
+            return true;
+        }
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $this->getRequest());
+        curl_setopt($ch, CURLOPT_FRESH_CONNECT, true); 
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); 
+        $response = curl_exec($ch); 
+        if ($response === false) {
+            $this->Response = curl_error($ch);
+            return false;
+        } else {
+            $this->Response = $response;
+        }
+        curl_close($ch);
+        unset($ch);
+
+        $response = explode(' ', $response);
+        if (count($response) !== 2) {
+            return false;
+        }
+
+        if ($response[0] !== '000000') {
+            return false;
+        } else {
+            $transaction = explode('|', $response[1]);
+            $this->TransactionID = $transaction[0];
+            $this->RedirectURI   = $transaction[1];
+            return true;
+        }
     }
 }

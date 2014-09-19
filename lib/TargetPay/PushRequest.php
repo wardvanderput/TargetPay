@@ -7,7 +7,7 @@ namespace TargetPay;
  * @author    Ward van der Put <Ward.van.der.Put@gmail.com>
  * @copyright Copyright © 2014 E.W. van der Put
  * @license   http://www.gnu.org/licenses/gpl.html GPLv3
- * @version   0.1.0
+ * @version   0.1.1
  *
  * The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
  * "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
@@ -54,6 +54,10 @@ class PushRequest
     public function __get($key)
     {
         $key = strtolower($key);
+
+        if ($key == 'status') {
+            return $this->getStatus();
+        }
 
         if ($key == 'trxid') {
             return $this->getTransactionID();

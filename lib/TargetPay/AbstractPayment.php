@@ -7,7 +7,11 @@ namespace TargetPay;
  * @author    Ward van der Put <Ward.van.der.Put@gmail.com>
  * @copyright Copyright © 2014 E.W. van der Put
  * @license   http://www.gnu.org/licenses/gpl.html GPLv3
- * @version   0.3.0
+ * @version   0.4.0
+ *
+ * The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+ * "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
+ * document are to be interpreted as described in RFC 2119.
  */
 abstract class AbstractPayment
 {
@@ -192,6 +196,22 @@ abstract class AbstractPayment
     public function getTransactionID()
     {
         return $this->TransactionID;
+    }
+
+    /**
+     * Get the user IP address.
+     *
+     * @param void
+     *
+     * @return string|null Remote client IP address.
+     */
+    public function getUserIP()
+    {
+        if (isset($this->BaseRequestParameters['userip'])) {
+            return $this->BaseRequestParameters['userip'];
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -384,6 +404,40 @@ abstract class AbstractPayment
             $rtlo = (int) $rtlo;
         }
         $this->BaseRequestParameters['rtlo'] = $rtlo;
+    }
+
+    /**
+     * Set the user IP address.
+     *
+     * @api
+     *
+     * @param string $userip Optional Internet Protocol (IP) client address.
+     *     If the user IP address is omitted, it is set to the default remote
+     *     address set by the server.
+     *
+     * @return $this
+     *
+     * @throws \UnexpectedValueException Throws TargetPay API error TP0009 as
+     *     an SPL unexpected value runtime exception on an invalid or missing
+     *     user IP address.
+     */
+    public function setUserIP($userip = null)
+    {
+        if ($userip == null) {
+            $userip = $_SERVER['REMOTE_ADDR'];
+        }
+
+        $userip = filter_var($userip, FILTER_VALIDATE_IP);
+        if ($userip === false) {
+            throw new \UnexpectedValueException(
+                'TP0009 Invalid or no user IP given.',
+                (int) base_convert('TP0009', 36, 10)
+            );
+        } else {
+            $this->BaseRequestParameters['userip'] = $userip;
+        }
+
+        return $this;
     }
 
     /**

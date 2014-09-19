@@ -7,7 +7,11 @@ namespace TargetPay;
  * @author    Ward van der Put <Ward.van.der.Put@gmail.com>
  * @copyright Copyright © 2014 E.W. van der Put
  * @license   http://www.gnu.org/licenses/gpl.html GPLv3
- * @version   0.0.3
+ * @version   0.0.4
+ *
+ * The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+ * "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
+ * document are to be interpreted as described in RFC 2119.
  */
 class iDEAL extends AbstractPayment
 {
@@ -27,8 +31,18 @@ class iDEAL extends AbstractPayment
      */
     protected $Issuers = false;
 
-    /** @type string $BaseRequest */
+    /** @type string $BaseRequest TargetPay URL to start an iDEAL transaction. */
     protected $BaseRequest = 'https://www.targetpay.com/ideal/start';
+
+    /**
+     * @type array $BaseRequestParameters Request parameters for the TargetPay
+     *     iDEAL URI.  If 'cinfo_in_callback' is set to 1, customer information
+     *     is included in the API response.  The customer info consists of the
+     *     customer name and the International Bank Account Number (IBAN).
+     */
+    protected $BaseRequestParameters = array(
+        'cinfo_in_callback' => 1
+    );
 
     /**
      * Get the iDEAL issuers.
@@ -142,6 +156,32 @@ class iDEAL extends AbstractPayment
         }
 
         $this->Issuers = $issuers;
+    }
+
+    /**
+     * Display/hide customer information.
+     *
+     * @param boolean $cinfo_in_callback Display customer information (default
+     *     true) in the API callback or hide it (false).
+     *
+     * @return $this
+     */
+    public function setCustomerInformation($cinfo_in_callback = true)
+    {
+        if (!is_bool($cinfo_in_callback)) {
+            if ($cinfo_in_callback == 1) {
+                $cinfo_in_callback = true;
+            } else {
+                $cinfo_in_callback = false;
+            }
+        }
+
+        if ($cinfo_in_callback) {
+            $this->BaseRequestParameters['cinfo_in_callback'] = 1;
+        } else {
+            unset($this->BaseRequestParameters['cinfo_in_callback']);
+        }
+        return $this;
     }
 
     /**

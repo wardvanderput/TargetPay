@@ -7,7 +7,7 @@ namespace TargetPay;
  * @author    Ward van der Put <Ward.van.der.Put@gmail.com>
  * @copyright Copyright © 2014 E.W. van der Put
  * @license   http://www.gnu.org/licenses/gpl.html GPLv3
- * @version   0.1.1
+ * @version   0.1.2
  *
  * The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
  * "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
@@ -41,6 +41,10 @@ class PushRequest
             $this->fail();
         } else {
             $this->populate();
+
+            // Respond with a plain-text OK
+            header('Content-Type: text/plain; charset=UTF-8');
+            echo 'OK';
         }
     }
 

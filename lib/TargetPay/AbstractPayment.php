@@ -7,7 +7,7 @@ namespace TargetPay;
  * @author    Ward van der Put <Ward.van.der.Put@gmail.com>
  * @copyright Copyright © 2014 E.W. van der Put
  * @license   http://www.gnu.org/licenses/gpl.html GPLv3
- * @version   0.4.0
+ * @version   0.5.0
  *
  * The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
  * "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
@@ -326,6 +326,30 @@ abstract class AbstractPayment
             $this->BaseRequestParameters['description'] = $description;
         }
 
+        return $this;
+    }
+
+    /**
+     * Set the user interface language.
+     *
+     * @api
+     *
+     * @param string $language_id ISO 639 language identifier.  Defaults to
+     *     'nl' for Dutch, because TargetPay, as a payment service provider
+     *     from the Netherlands, is most likely used to handle online payments
+     *     by Dutch-speaking customers.
+     *
+     * @return $this
+     */
+    public function setLanguage($language_code = 'nl')
+    {
+        if (is_string($language_code)) {
+            $language_code = trim($language_code);
+            $language_code = strtolower($language_code);
+            if (strlen($language_code) == 2) {
+                $this->BaseRequestParameters['lang'] = $language_code;
+            }
+        }
         return $this;
     }
 

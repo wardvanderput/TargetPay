@@ -7,7 +7,7 @@ namespace TargetPay;
  * @author    Ward van der Put <Ward.van.der.Put@gmail.com>
  * @copyright Copyright © 2014 E.W. van der Put
  * @license   http://www.gnu.org/licenses/gpl.html GPLv3
- * @version   0.1.3
+ * @version   0.1.4
  *
  * The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
  * "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
@@ -23,12 +23,6 @@ class PushRequest
      */
     public function __construct()
     {
-        // Initialize a response with common HTTP headers
-        header('Cache-Control: no-store, no-cache, must-revalidate');
-        header('Cache-Control: post-check=0, pre-check=0', false);
-        header('Pragma: no-cache');
-        header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT');
-
         // Allow POST requests only
         if (strtoupper($_SERVER['REQUEST_METHOD']) != 'POST') {
             if ($this->isTrustedClient()) {
@@ -42,6 +36,11 @@ class PushRequest
         } else {
             $this->populate();
 
+            // Initialize a response with common HTTP headers
+            header('Cache-Control: no-store, no-cache, must-revalidate');
+            header('Cache-Control: post-check=0, pre-check=0', false);
+            header('Pragma: no-cache');
+            header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT');
             // Respond with a plain-text OK
             header('Content-Type: text/plain; charset=UTF-8');
             echo 'OK';

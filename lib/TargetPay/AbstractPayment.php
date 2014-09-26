@@ -7,7 +7,7 @@ namespace TargetPay;
  * @author    Ward van der Put <Ward.van.der.Put@gmail.com>
  * @copyright Copyright © 2014 E.W. van der Put
  * @license   http://www.gnu.org/licenses/gpl.html GPLv3
- * @version   0.5.0
+ * @version   0.5.1
  *
  * The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
  * "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
@@ -310,8 +310,28 @@ abstract class AbstractPayment
             $description = str_replace('€ ', 'EUR ', $description);
             $description = str_replace(' €', ' euro', $description);
             $description = str_replace('€', ' EUR ', $description);
+
+            $replace_pairs = array(
+                'À' => 'A', 'Á' => 'A', 'Â' => 'A', 'Ã' => 'A', 'Ä' => 'A', 'Å' => 'A',
+                'Ç' => 'C',
+                'È' => 'E', 'É' => 'E', 'Ê' => 'E', 'Ë' => 'E',
+                'Ì' => 'I', 'Í' => 'I', 'Î' => 'I', 'Ï' => 'I',
+                'Ñ' => 'N',
+                'Ò' => 'O', 'Ó' => 'O', 'Ô' => 'O', 'Õ' => 'O', 'Ö' => 'O', 'Ø' => 'O',
+                'à' => 'a', 'á' => 'a', 'â' => 'a', 'ã' => 'a', 'ä' => 'a', 'å' => 'a',
+                'ç' => 'c',
+                'è' => 'e', 'é' => 'e', 'ê' => 'e', 'ë' => 'e',
+                'ì' => 'i', 'í' => 'i', 'î' => 'i', 'ï' => 'i',
+                'ñ' => 'n',
+                'ò' => 'o', 'ó' => 'o', 'ô' => 'o', 'õ' => 'o', 'ö' => 'o', 'ø' => 'o',
+                'ù' => 'u', 'ú' => 'u', 'û' => 'u', 'ü' => 'u'
+            );
+            $description = strtr($description, $replace_pairs);
+            $description = iconv('UTF-8', 'ASCII//IGNORE', $description);
+
             $description = preg_replace('!\s+!', ' ', $description);
             $description = trim($description, "\x00..\x20");
+
             if (strlen($description) > 32) {
                 $description = substr($description, 0, 32);
             }
